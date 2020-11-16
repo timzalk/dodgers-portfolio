@@ -1,0 +1,90 @@
+---
+title: "Household Finance Database"
+author: "Timothy Zalk"
+date: "6/15/2019"
+output: 
+  html_document:
+    self_contained: no
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(formattable)
+library(RODBC)
+library(ggplot2)
+
+opts_chunk$set(echo = TRUE)
+
+```
+
+## Data Questions
+This report presents the results to the **data questions** for the Household Finance Database are presented below. 
+
+
+```{r database connection, include = FALSE}
+
+con <- odbcConnect("proj-connection")
+
+```
+
+### 1. What merchants do I spend the most money at?
+```{r dq1, echo = FALSE, results = 'asis'}
+
+q1.query <- "SELECT * FROM proj.TopMerchants;"
+q1.result <- sqlQuery(con, q1.query)
+
+data.frame(q1.result$Name, currency(q1.result$TotalAmount)) %>%
+  kable(col.names = c("Merchant", "Amount Spent")) %>%
+  kable_styling(full_width = FALSE)
+
+```
+
+### 2. What categories do I spend the most money on?
+```{r dq2, echo = FALSE, results = 'asis'}
+
+q2.query <- "SELECT * FROM proj.TopCategories;"
+q2.result <- sqlQuery(con, q2.query)
+
+data.frame(q2.result$Name, currency(q2.result$TotalAmount))[1:6, ] %>% 
+  kable(col.names = c("Category", "Amount Spent")) %>% 
+  kable_styling(full_width = FALSE)
+
+```
+
+### 3. What months do I typically spend the most money?
+```{r dq3, echo = FALSE, results = 'asis'}
+
+q3.query <- "SELECT * FROM proj.MonthTotals;"
+q3.result <- sqlQuery(con, q3.query)
+
+data.frame(paste0(q3.result$TransactionMonth), currency(q3.result$AverageAmount)) %>% 
+  kable(col.names = c("Month", "Average Spent")) %>% 
+  kable_styling(full_width = FALSE)
+
+```
+
+### 4. What days of the week do I spend the most/least money?
+```{r dq4, echo = FALSE, results = 'asis'}
+
+q4.query <- "SELECT * FROM proj.WeekdayTotals;"
+q4.result <- sqlQuery(con, q4.query)
+
+data.frame(q4.result$TransactionWeekday, currency(q4.result$TotalAmount)) %>% 
+  kable(col.names = c("Weekday", "Amount Spent")) %>% 
+  kable_styling(full_width = FALSE)
+
+```
+
+### 5. On what day did I spend the most?
+```{r dq5, echo = FALSE, results = 'asis'}
+
+q5.query <- "SELECT * FROM proj.WorstDays;"
+q5.result <- sqlQuery(con, q5.query)
+data.frame(format(q5.result$TransactionDate, format = "%B %d, %Y"), currency(q5.result$TotalAmountSpent)) %>% 
+  kable(col.names = c("Date", "Amount Spent")) %>% 
+  kable_styling(full_width = FALSE)
+
+```
